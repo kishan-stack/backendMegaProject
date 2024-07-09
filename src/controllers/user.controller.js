@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js"
 import { User } from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
-
+import {upload } from "../middlewares/multer.middleware.js"
 const generateAccessAndRefreshToken = async (userId) =>{
     try {
         const user = await User.findById(userId);
@@ -82,6 +82,9 @@ const registerUser = asyncHandler(async (req,res) =>{
 
 const loginUser = asyncHandler(async (req,res) =>{
     const {email,username,password} = req.body;
+    console.log(req.body);
+    console.log(email,username,password);
+    
 
     if(!( username || email )){
         throw new ApiError(400,"Username or email is required");
