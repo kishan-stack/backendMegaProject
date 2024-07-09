@@ -83,7 +83,7 @@ const registerUser = asyncHandler(async (req,res) =>{
 const loginUser = asyncHandler(async (req,res) =>{
     const {email,username,password} = req.body;
     console.log(req.body);
-    console.log(email,username,password);
+    console.log(email,password);
     
 
     if(!( username || email )){
@@ -129,8 +129,8 @@ const logOutUser = asyncHandler(async(req,res)=>{
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
-                refreshToken:undefined,
+            $unset:{
+                refreshToken:1  ,
             },
         },
         {
