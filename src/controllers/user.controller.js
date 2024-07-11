@@ -8,8 +8,8 @@ const generateAccessAndRefreshToken = async (userId) =>{
     try {
         const user = await User.findById(userId);
         
-        const refreshToken = user.generateAccessToken();
-        const accessToken = user.generateRefreshToken();
+        const accessToken = await user.generateAccessToken();
+        const refreshToken = await user.generateRefreshToken();
 
         user.refreshToken = refreshToken;
         
@@ -82,8 +82,8 @@ const registerUser = asyncHandler(async (req,res) =>{
 
 const loginUser = asyncHandler(async (req,res) =>{
     const {email,username,password} = req.body;
-    console.log(req.body);
-    console.log(email,password);
+    // console.log(req.body);
+    // console.log(email,password);
     
 
     if(!( username || email )){
@@ -104,9 +104,8 @@ const loginUser = asyncHandler(async (req,res) =>{
     }
 
     const {accessToken,refreshToken} = await generateAccessAndRefreshToken(user._id);
-
-    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
-
+    // console.log(`Access toke from generate access and refresh token function  :: ${accessToken} and refresh token :: ${refreshToken}`);
+    const loggedInUser = await User.findById(user._id).select(" -password -refreshToken");
     const options = {
         httpOnly:true,
         secure:true
@@ -138,7 +137,7 @@ const logOutUser = asyncHandler(async(req,res)=>{
         },
 
     )
-
+    // console.log("res.user._id :: ",res.user._id);
     const options = {
         httpOnly:true,
         secure:true
