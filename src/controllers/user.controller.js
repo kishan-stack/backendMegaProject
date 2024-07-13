@@ -108,12 +108,15 @@ const loginUser = asyncHandler(async (req,res) =>{
     }
 
     const {accessToken,refreshToken} = await generateAccessAndRefreshToken(user._id);
-    // console.log(`Access toke from generate access and refresh token function  :: ${accessToken} and refresh token :: ${refreshToken}`);
+    // console.log(
+    //   `from generate access and refresh token function Access token   :: ${accessToken} and refresh token :: ${refreshToken}`
+    // );
     const loggedInUser = await User.findById(user._id).select(" -password -refreshToken");
     const options = {
         httpOnly:true,
         secure:true
     }
+
 
     return res
     .status(200)
@@ -165,45 +168,44 @@ const refreshAccessToken = asyncHandler(async(req,res)=>{
     if(!incomingRefreshToken){
         throw new ApiError(401,"Unauthorized request")
     }
-    
+    // console.log("incoming refresh token :: ",incomingRefreshToken);
     try {
-    
+        // console.log("inside the try block")
         const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
-    
+        // console.log(`decoded token :: ${decodedToken}`)
         const user = await User.findById(decodedToken?._id)
+        // console.log(`user :: ${user}`)
     
         if(!user){
             throw new ApiError(401,"Invalid refresh Token")
         }
-    
+    // console.log("user is there")
         if(incomingRefreshToken!==user?.refreshToken){
             throw new ApiError(401,"Refresh Token is invalid or used");
         }
-    
+    // console.log("incoming refresh token = user.refreshtoken")
         const options = {
             httpOnly:true,
             secure:true
         }
     
-        const {accessToken,newRefreshToken} = await generateAccessAndRefreshToken(user._id)
-    
-        return res
-          .status(200)
-          .cookie("accessToken", accessToken, options)
-          .cookie("refreshToken", newRefreshToken, options)
-          .json(
-            new ApiResponse(
+          const { accessToken, refreshToken } =
+            await generateAccessAndRefreshToken(user._id);
+        // console.log(`new access token is ${accessToken} and new refreshtoken is ${refreshToken}`)
+          return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(
+              new ApiResponse(
                 200,
-                {
-                    accessToken,
-                    refreshToken: newRefreshToken,
-                },
-                "Access Token Refreshed"
-            )
-          );
+                { accessToken, refreshToken: refreshToken },
+                "Access token refreshed"
+              )
+            );
     
     } catch (error) {
-        throw new ApiError(401,error?.message||"Invalid refresh Token")
+        throw new ApiError(401,"Invalid refresh Token catch phrase at 209")
     }
 });
 
@@ -213,7 +215,7 @@ const changeCurrentPassword = asyncHandler(async (req,res)=>{
     const user = await User.findById(req.user?._id)
     
     const isOldPasswordCorrect = await user.isPasswordCorrect(oldPassword);
-    if (!oldPassword) {
+    if (!isOldPasswordCorrect) {
         throw new ApiError(401,"Invalid old password");
     }
 
@@ -231,13 +233,13 @@ const getCurrentUser = asyncHandler(async(req,res)=>{
    return res
    .status(200)
    .json(
-    new ApiResponse(200,user,"User fetched succesfully")
+    new ApiResponse(200,req.user,"User fetched succesfully")
    )
 });
 
 const updateUserDetails = asyncHandler(async(req,res)=>{
-    const {fullName,email} = req.body;
-    if(!(fullName&&email)){
+    const {fullName,email,username} = req.body;
+    if(!(fullName&&email&&username)){
         throw new ApiError(400,"All feilds are required");
     }
 
@@ -246,7 +248,8 @@ const updateUserDetails = asyncHandler(async(req,res)=>{
         {
             $set:{
                 fullName,
-                email
+                email,
+                username
             }
         },
         {

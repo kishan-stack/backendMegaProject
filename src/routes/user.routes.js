@@ -18,7 +18,6 @@ router.route("/register").post(
         ]),
     registerUser
 )
-
 router.route("/login").post(upload.any(), loginUser);
 
 //secured Routes
