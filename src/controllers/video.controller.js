@@ -84,22 +84,26 @@ const getAllVideos = asyncHandler(async (req, res) => {
             updatedAt: 1,
             owner: 1,
             "ownerInfo.avatar": 1,
-            "ownerInfo.fullName": 1,
+            "ownerInfo.username": 1,
           },
         },
       ]),
       options
     );
 
+
+    if (!result) {
+      throw new ApiResponse(200, "No Videos found !!");
+    }
+    
+    
     return res
     .status(200)
     .json(
       new ApiResponse(200,result,"Videos fetched successfully")
     )
-
-
-  } catch (error) {
-    console.log("Error while fetching videos: ",error);
+  } 
+  catch (error) {
     res.status(500)
     .json(
       new ApiError(500,error.message|| "error while fetching videos from database")
@@ -253,7 +257,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
   return res
   .status(200)
   .json(
-    new ApiResponse(200,video,"video deleted successfully")
+    new ApiResponse(200,"video deleted successfully")
   )
 
 });
