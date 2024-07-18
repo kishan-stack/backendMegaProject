@@ -450,6 +450,30 @@ const getWatchHistory = asyncHandler(async(req,res)=>{
 })
 
 
+
+const addVideoToWatchHistory = asyncHandler(async (req,res)=>{
+    const { videoId } = req.body;
+    
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $addToSet:{ watchHistory :new mongoose.Types.ObjectId( videoId )}
+        },
+        {
+            new:true
+        }
+    );
+
+    if(!user){
+        throw new ApiError(500,"Error while adding video to watch history")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,"Video added to watch history successfully")
+    )
+})
 export { 
     registerUser,
     loginUser,
@@ -461,5 +485,6 @@ export {
     updateUserAvatar,
     updateUserCoverImage,
     getUserChannelProfile,
-    getWatchHistory
+    getWatchHistory,
+    addVideoToWatchHistory
 };
