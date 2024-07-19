@@ -5,7 +5,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
-
+import { Video } from "../models/video.model.js"
 
 
 const generateAccessAndRefreshToken = async (userId) =>{
@@ -463,6 +463,10 @@ const addVideoToWatchHistory = asyncHandler(async (req,res)=>{
         }
     );
 
+     await Video.updateOne(
+       { _id: videoId }, // Filter to find the video by ID
+       { $inc: { views: 1 } } // Increment the views by 1
+     );
     if(!user){
         throw new ApiError(500,"Error while adding video to watch history")
     }
@@ -470,7 +474,7 @@ const addVideoToWatchHistory = asyncHandler(async (req,res)=>{
     return res
     .status(200)
     .json(
-        new ApiResponse(200,"Video added to watch history successfully")
+        new ApiResponse(200,"Video added to watch history successfully n views of video i incremented")
     )
 })
 export { 
