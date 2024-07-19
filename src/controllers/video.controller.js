@@ -271,26 +271,35 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
   
 
-  const video = await Video.findByIdAndUpdate(
-    videoId,
-    {
-      $set: {
-        isPublished: !req.body.isPublished,
-      },
-    },
-    { new: true }
-  );
-  
+  // const video = await Video.findByIdAndUpdate(
+  //   videoId,
+  //   {
+  //     $set: {
+  //         isPublished: { $cond: [{ $eq: ['$isPublished', true] }, false, true] },
+  //       }
+  //   },
+  //   { new: true }
+  // );
 
-  if (!video) {
-    throw new ApiError(404, "Video not found");
+  try {
+    const video = await Video.findById(videoId)
+    if (!video) {
+      throw new ApiError(404, "Video not found");
+    }
+    video.isPublished = !video.isPublished;
+    await video.save();
+
+    return res
+    .status(200)
+    .json(
+      new ApiResponse(200,video,"video status updated successfully")
+    )
+  } catch (error) {
+    throw new ApiError("video not found from catch of try&catch")
   }
 
-  return res
-  .status(200)
-  .json(
-    new ApiResponse(200,video,"video status updated successfully")
-  )
+  
+
 
 });
 
